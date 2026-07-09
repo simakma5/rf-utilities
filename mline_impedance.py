@@ -15,9 +15,9 @@ def calculate_microstrip():
             "Hammerstad & Jensen model, and calculates frequency limits for single-mode "
             "propagation and surface-wave excitation."
         ),
-        add_help=False
+        add_help=False,
     )
-    parser.add_argument('--help', action='help', help='Show this help message and exit')
+    parser.add_argument("--help", action="help", help="Show this help message and exit")
     parser.add_argument("-f", "--freq", type=float, required=True, help="Frequency (GHz)")
     parser.add_argument("-w", "--width", type=float, required=True, help="Trace width (mm)")
     parser.add_argument("-h", "--height", type=float, required=True, help="Substrate height (mm)")
@@ -40,19 +40,19 @@ def calculate_microstrip():
 
     # Calculate limits (c0 is in m/s, convert dimensions to mm for calculation using c = 299.792458 mm/ns)
     c_mm_ns = 299.792458
-    
+
     # 1. Transverse resonance cutoff frequency
     f_tr = c_mm_ns / (sqrt(args.eps_r) * (2.0 * args.width + 0.8 * args.height))
-    
+
     # 2. First TE surface wave mode cutoff frequency
     if args.eps_r > 1.0:
         f_te1 = c_mm_ns / (4.0 * args.height * sqrt(args.eps_r - 1.0))
     else:
-        f_te1 = float('inf')
+        f_te1 = float("inf")
 
     # Gather warnings
     warnings = []
-    
+
     # Model range warnings
     w_h_ratio = args.width / args.height
     if w_h_ratio < 0.1 or w_h_ratio > 10.0:
@@ -62,7 +62,7 @@ def calculate_microstrip():
         )
     if args.thick > 0 and args.thick / args.height >= 0.25:
         warnings.append(
-            f"Thickness-to-Height ratio (T/H = {args.thick/args.height:.3f}) is high. "
+            f"Thickness-to-Height ratio (T/H = {args.thick / args.height:.3f}) is high. "
             "Thickness correction formulas are less accurate when T/H >= 0.25."
         )
     if args.thick >= args.height:
@@ -70,7 +70,7 @@ def calculate_microstrip():
             f"Trace thickness (T = {args.thick} mm) is greater than or equal to "
             f"substrate height (H = {args.height} mm), which violates typical microstrip geometry."
         )
-        
+
     # High frequency / mode propagation warnings
     if args.freq >= f_tr:
         warnings.append(
@@ -111,9 +111,11 @@ def calculate_microstrip():
     guided_wl = (C0 / (freq_hz * sqrt(line.ep_reff_f[0].real))) * 1e3
 
     width = 3 + 1 + args.precision  # 3 for digits, 1 for decimal point, plus precision
-    print('\nDisclaimer: Quasi-static calculations assume TEM mode propagation. Dispersive calculations include frequency-dependent effects.')
+    print(
+        "Disclaimer: Quasi-static calculations assume TEM mode propagation. Dispersive calculations include frequency-dependent effects."
+    )
     print(f"\n=== Microstrip results at {args.freq} GHz ===")
-    
+
     print("\n--- Electromagnetic properties ---")
     print("Quasi-static approximation:")
     print(f"  Line impedance:         {line.zl_eff[0].real:>{width}.{args.precision}f} Ω")
@@ -123,17 +125,10 @@ def calculate_microstrip():
     print(f"  Effective permittivity: {line.ep_reff_f[0].real:>{width}.{args.precision}f}")
     print(f"  Guided wavelength:      {guided_wl:>{width}.{args.precision}f} mm")
     print("---------------------------------")
-    
-    print("\n--- Dimensions ---")
-    print(f"Trace width (W):        {args.width:>{width}.{args.precision}f} mm")
-    print(f"Substrate height (H):   {args.height:>{width}.{args.precision}f} mm")
-    print(f"Trace thickness (T):    {args.thick:>{width}.{args.precision}f} mm")
-    print(f"Permittivity (eps_r):   {args.eps_r:>{width}.{args.precision}f}")
-    print("---------------------------------")
-    
-    print("\n--- Frequency Limits ---")
+
+    print("\n--- Frequency limits ---")
     print(f"Transverse resonance (f_TR): {f_tr:>{width}.{args.precision}f} GHz")
-    if f_te1 != float('inf'):
+    if f_te1 != float("inf"):
         print(f"First TE surface wave (f_TE1): {f_te1:>{width}.{args.precision}f} GHz")
     else:
         print("First TE surface wave (f_TE1):   N/A (eps_r = 1.0)")
@@ -143,9 +138,7 @@ def calculate_microstrip():
         print("\n!!! WARNINGS / LIMIT VIOLATIONS !!!")
         for warning in warnings:
             print(f"- {warning}")
-        print("-----------------------------------\n")
-    else:
-        print()
+        print("-----------------------------------")
 
 
 if __name__ == "__main__":
